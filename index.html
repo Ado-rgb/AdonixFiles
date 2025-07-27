@@ -36,11 +36,11 @@
   function preventDefaults(e) { e.preventDefault(); e.stopPropagation() }
 
   ;['dragenter', 'dragover'].forEach(eventName => {
-    dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false)
+    dropArea.classList.add('highlight')
   })
 
   ;['dragleave', 'drop'].forEach(eventName => {
-    dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false)
+    dropArea.classList.remove('highlight')
   })
 
   dropArea.addEventListener('drop', handleDrop, false)
@@ -55,12 +55,23 @@
     const formData = new FormData()
     for (let file of files) formData.append('files', file)
 
-    const res = await fetch('/upload', { method: 'POST', body: formData })
-    const data = await res.json()
-    linksDiv.innerHTML = data.files.map(url =>
-      `<p><a href="${url}" target="_blank">${url}</a>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText('${url}')">Copiar</button></p>`
-    ).join('')
+    linksDiv.innerHTML = `<p>Subiendo...</p>`
+
+    try {
+      const res = await fetch('/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if(data.success) {
+        linksDiv.innerHTML = data.files.map(url =>
+          `<p><a href="${url}" target="_blank">${url}</a>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('${url}')">Copiar</button></p>`
+        ).join('')
+      } else {
+        linksDiv.innerHTML = `<p>Error al subir los archivos.</p>`
+      }
+    } catch(e) {
+      linksDiv.innerHTML = `<p>Error en la conexión.</p>`
+    }
   }
 </script>
 </body>
