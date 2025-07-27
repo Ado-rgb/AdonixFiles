@@ -9,10 +9,10 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(cors())
-app.use(express.static("public"))
 app.use('/files', express.static('uploads'))
+app.use(express.static('.')) // Sirve index.html desde raíz
 
-// Configuración multer (sin filtro de tipo)
+// Configuración de multer (sin filtro de tipo)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (!fs.existsSync('uploads')) fs.mkdirSync('uploads')
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 // Permitir archivos hasta 200MB
 const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } })
 
-// Subida múltiple de archivos
+// Subida múltiple
 app.post('/upload', upload.array('files', 20), (req, res) => {
   const urls = req.files.map(f => `${req.protocol}://${req.get('host')}/files/${f.filename}`)
   res.json({ success: true, files: urls })
